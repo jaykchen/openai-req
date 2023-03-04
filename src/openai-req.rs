@@ -3,6 +3,7 @@ use http_req::{
     request::{Method, Request},
     uri::Uri,
 };
+use slack_flows::send_message_to_channel;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -35,11 +36,12 @@ async fn handler(payload: EventPayload) {
         EventPayload::IssueCommentEvent(e) => {
             if e.comment.user.r#type != "Bot" {
                 if let Some(b) = e.comment.body {
-                    if let Some(r) = chat_completion(&b) {
-                        if let Err(e) = issues.create_comment(e.issue.number, r.choice).await {
-                            println!("Error: {}", e.to_string());
-                        }
-                    }
+                    send_message_to_channel("ik8", "general", b);
+                    // if let Some(r) = chat_completion(&b) {
+                    //     if let Err(e) = issues.create_comment(e.issue.number, r.choice).await {
+                    //         println!("Error: {}", e.to_string());
+                    //     }
+                    // }
                 }
             }
         }

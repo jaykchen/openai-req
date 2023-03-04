@@ -14,3 +14,4 @@ github-flows = "0.2.0"
 serde = { version = "1.0.152", features = ["derive"] }
 http_req_wasi = { version = "0.10.2", features = ["wasmedge_ssl"] }
 anyhow = "1.0.69"
+slack-flows = "0.2.0"
