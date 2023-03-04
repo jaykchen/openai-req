@@ -99,12 +99,14 @@ pub fn chat_completion(prompt: &str) -> Option<ChatResponse> {
     // let uri = "https://api.openai.com/v1/chat/completions";
 
     let uri = Uri::try_from(uri).unwrap();
+    let bearer_token = format!("Bearer {}", api_token);
     let mut writer = Vec::new();
     let body_str = params.to_string();
     let body = body_str.as_bytes();
     match Request::new(&uri)
         .method(Method::POST)
         .header("Content-Type", "application/json")
+        .header("Authorization", &bearer_token)
         .header("Content-Length", &body.len())
         .body(&body)
         .send(&mut writer)
