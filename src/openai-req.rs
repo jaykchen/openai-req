@@ -36,12 +36,15 @@ async fn handler(payload: EventPayload) {
         EventPayload::IssueCommentEvent(e) => {
             if e.comment.user.r#type != "Bot" {
                 if let Some(b) = e.comment.body {
-                    send_message_to_channel("ik8", "general", b.clone());
                     if let Some(r) = chat_completion(&b) {
                         send_message_to_channel("ik8", "general", r.choice.clone());
 
                         if let Err(e) = issues.create_comment(e.issue.number, r.choice).await {
-                            println!("Error: {}", e.to_string());
+                            send_message_to_channel(
+                                "ik8",
+                                "general",
+                                "failed to create comment response".to_string(),
+                            );
                         }
                     }
                 }
@@ -70,13 +73,11 @@ impl Default for ChatResponse {
 pub struct CompletionRequest {
     pub model: String,
     pub prompt: String,
-    pub suffix: Option<String>,
     pub n: u8,
     pub best_of: u8,
     pub max_tokens: u16,
     pub temperature: f32,
     pub top_p: f32,
-    pub logprobs: Option<u8>,
     pub presence_penalty: f32,
     pub frequency_penalty: f32,
 }
@@ -86,13 +87,11 @@ impl Default for CompletionRequest {
         CompletionRequest {
             model: String::from("text-davinci-003"),
             prompt: String::from("<|endoftext|>"),
-            suffix: None,
             n: 1,
             best_of: 1,
             max_tokens: 16,
             temperature: 1.0,
             top_p: 1.0,
-            logprobs: None,
             presence_penalty: 0.0,
             frequency_penalty: 0.0,
         }
@@ -106,13 +105,11 @@ pub fn chat_completion(prompt: &str) -> Option<ChatResponse> {
     let params = CompletionRequest {
         model: "text-davinci-003".to_string(),
         prompt: prompt.to_string(),
-        suffix: None,
         n: 1,
         best_of: 1,
         max_tokens: 16,
         temperature: 1.0,
         top_p: 1.0,
-        logprobs: None,
         presence_penalty: 0.0,
         frequency_penalty: 0.0,
     };
@@ -152,7 +149,14 @@ pub fn chat_completion(prompt: &str) -> Option<ChatResponse> {
             }
             serde_json::from_slice::<ChatResponse>(&writer).ok()
         }
-        Err(_) => None,
+        Err(_) => {
+            send_message_to_channel(
+                "ik8",
+                "general",
+                "chat completion function failed".to_string(),
+            );
+            return None;
+        }
     }
 
     // let response = reqwest::Client::new()
