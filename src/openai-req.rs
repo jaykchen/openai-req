@@ -36,12 +36,14 @@ async fn handler(payload: EventPayload) {
         EventPayload::IssueCommentEvent(e) => {
             if e.comment.user.r#type != "Bot" {
                 if let Some(b) = e.comment.body {
-                    send_message_to_channel("ik8", "general", b);
-                    // if let Some(r) = chat_completion(&b) {
-                    //     if let Err(e) = issues.create_comment(e.issue.number, r.choice).await {
-                    //         println!("Error: {}", e.to_string());
-                    //     }
-                    // }
+                    send_message_to_channel("ik8", "general", b.clone());
+                    if let Some(r) = chat_completion(&b) {
+                        send_message_to_channel("ik8", "general", r.choice.clone());
+
+                        if let Err(e) = issues.create_comment(e.issue.number, r.choice).await {
+                            println!("Error: {}", e.to_string());
+                        }
+                    }
                 }
             }
         }
@@ -70,6 +72,18 @@ pub fn chat_completion(prompt: &str) -> Option<ChatResponse> {
     // let prompt = "How can I reply to comment on Issues at GitHub repository with rest API?";
 
     let params = serde_json::json!({
+        "model": "text-davinci-003",
+        "prompt": prompt,
+        "temperature": 0.7,
+        "top_p": 1,
+        "n": 1,
+        "stream": false,
+        "max_tokens": 512,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+    });
+
+    let params = serde_json::json!({
                 "model": "gpt-3.5-turbo",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
@@ -81,7 +95,8 @@ pub fn chat_completion(prompt: &str) -> Option<ChatResponse> {
         "frequency_penalty": 0,
     });
 
-    let uri = "https://api.openai.com/v1/chat/completions";
+    let uri = "https://api.openai.com/v1/completions";
+    // let uri = "https://api.openai.com/v1/chat/completions";
 
     let uri = Uri::try_from(uri).unwrap();
     let mut writer = Vec::new();
