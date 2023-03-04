@@ -1,0 +1,16 @@
+[package]
+name = "openai-req"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/openai-req.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+tokio = { version = "1.26.0", features = ["sync", "macros", "io-util", "rt", "time"] }
+serde_json = "1.0.93"
+github-flows = "0.2.0"
+serde = { version = "1.0.152", features = ["derive"] }
+http_req_wasi = { version = "0.10.2", features = ["wasmedge_ssl"] }
+anyhow = "1.0.69"
