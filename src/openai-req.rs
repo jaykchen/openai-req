@@ -66,22 +66,56 @@ impl Default for ChatResponse {
     }
 }
 
+#[derive(Debug, Serialize)]
+pub struct CompletionRequest {
+    pub model: String,
+    pub prompt: String,
+    pub suffix: Option<String>,
+    pub n: u8,
+    pub best_of: u8,
+    pub max_tokens: u16,
+    pub temperature: f32,
+    pub top_p: f32,
+    pub logprobs: Option<u8>,
+    pub presence_penalty: f32,
+    pub frequency_penalty: f32,
+}
+
+impl Default for CompletionRequest {
+    fn default() -> CompletionRequest {
+        CompletionRequest {
+            model: String::from("text-davinci-003"),
+            prompt: String::from("<|endoftext|>"),
+            suffix: None,
+            n: 1,
+            best_of: 1,
+            max_tokens: 16,
+            temperature: 1.0,
+            top_p: 1.0,
+            logprobs: None,
+            presence_penalty: 0.0,
+            frequency_penalty: 0.0,
+        }
+    }
+}
 pub fn chat_completion(prompt: &str) -> Option<ChatResponse> {
     let api_token = env::var("OPENAI_API_TOKEN").unwrap();
 
     // let prompt = "How can I reply to comment on Issues at GitHub repository with rest API?";
 
-    let params = serde_json::json!({
-        "model": "text-davinci-003",
-        "prompt": prompt,
-        "temperature": 0.7,
-        "top_p": 1,
-        "n": 1,
-        "stream": false,
-        "max_tokens": 512,
-        "presence_penalty": 0,
-        "frequency_penalty": 0,
-    });
+    let params = CompletionRequest {
+        model: "text-davinci-003".to_string(),
+        prompt: prompt.to_string(),
+        suffix: None,
+        n: 1,
+        best_of: 1,
+        max_tokens: 16,
+        temperature: 1.0,
+        top_p: 1.0,
+        logprobs: None,
+        presence_penalty: 0.0,
+        frequency_penalty: 0.0,
+    };
 
     // let params = serde_json::json!({
     //             "model": "gpt-3.5-turbo",
@@ -101,12 +135,13 @@ pub fn chat_completion(prompt: &str) -> Option<ChatResponse> {
     let uri = Uri::try_from(uri).unwrap();
     let bearer_token = format!("Bearer {}", api_token);
     let mut writer = Vec::new();
-    let body_str = params.to_string();
-    let body = body_str.as_bytes();
+    // let body_str = params.to_string();
+    // let body = body_str.as_bytes();
+    let body = serde_json::to_vec(&params).unwrap_or_default();
     match Request::new(&uri)
         .method(Method::POST)
-        .header("Content-Type", "application/json")
         .header("Authorization", &bearer_token)
+        .header("Content-Type", "application/json")
         .header("Content-Length", &body.len())
         .body(&body)
         .send(&mut writer)
