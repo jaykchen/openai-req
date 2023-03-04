@@ -83,17 +83,17 @@ pub fn chat_completion(prompt: &str) -> Option<ChatResponse> {
         "frequency_penalty": 0,
     });
 
-    let params = serde_json::json!({
-                "model": "gpt-3.5-turbo",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.7,
-        "top_p": 1,
-        "n": 1,
-        "stream": false,
-        "max_tokens": 512,
-        "presence_penalty": 0,
-        "frequency_penalty": 0,
-    });
+    // let params = serde_json::json!({
+    //             "model": "gpt-3.5-turbo",
+    //     "messages": [{"role": "user", "content": prompt}],
+    //     "temperature": 0.7,
+    //     "top_p": 1,
+    //     "n": 1,
+    //     "stream": false,
+    //     "max_tokens": 512,
+    //     "presence_penalty": 0,
+    //     "frequency_penalty": 0,
+    // });
 
     let uri = "https://api.openai.com/v1/completions";
     // let uri = "https://api.openai.com/v1/chat/completions";
